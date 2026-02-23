@@ -210,7 +210,7 @@ CREATE INDEX IF NOT EXISTS idx_sessions_consultant ON sessions(consultant_id);
 
 -- Seed default admin user (password: admin123)
 INSERT INTO users (email, password_hash, first_name, last_name, role)
-VALUES ('admin@consulting.local', '$2b$10$YourHashHere', 'Admin', 'User', 'admin')
+VALUES ('admin@consulting.local', '$2a$10$yzwVBBSt5CsoGUUvwvHLhetoFrK93BD7rgWyjyczLuEA739K1nMxe', 'Admin', 'User', 'admin')
 ON CONFLICT (email) DO NOTHING;
 
 -- Seed demo data
