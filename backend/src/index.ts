@@ -1,9 +1,11 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
+import pool from './db.js';
 import authRoutes from './routes/auth.js';
 import clientRoutes from './routes/clients.js';
 import consultantRoutes from './routes/consultants.js';
@@ -17,6 +19,30 @@ import portfolioRoutes from './routes/portfolios.js';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '4000', 10);
+
+// Ensure admin user exists with correct password hash on startup
+async function seedAdminUser() {
+  try {
+    const existing = await pool.query('SELECT id FROM users WHERE email = $1', ['admin@consulting.local']);
+    if (existing.rows.length === 0) {
+      const hash = await bcrypt.hash('admin123', 10);
+      await pool.query(
+        `INSERT INTO users (email, password_hash, first_name, last_name, role)
+         VALUES ($1, $2, 'Admin', 'User', 'admin')`,
+        ['admin@consulting.local', hash]
+      );
+      console.log('Seeded admin user: admin@consulting.local / admin123');
+    } else {
+      // Update the hash in case it was a placeholder
+      const hash = await bcrypt.hash('admin123', 10);
+      await pool.query('UPDATE users SET password_hash = $1 WHERE email = $2', [hash, 'admin@consulting.local']);
+      console.log('Admin user exists, password hash updated');
+    }
+  } catch (err) {
+    console.error('Error seeding admin user:', err);
+  }
+}
+seedAdminUser();
 
 // Middleware
 app.use(cors());
