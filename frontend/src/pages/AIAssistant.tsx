@@ -107,15 +107,15 @@ export default function AIAssistant() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
+    <div className="flex flex-col h-[calc(100vh-10rem)] sm:h-[calc(100vh-8rem)]">
       {/* Agent Type Selector */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 shrink-0">
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 shrink-0 touch-scroll sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0">
         {AGENT_TYPES.map((agent) => (
           <button
             key={agent.id}
             onClick={() => setSelectedAgent(agent.id)}
             className={clsx(
-              'card p-4 text-left transition-all',
+              'card p-4 text-left transition-all shrink-0 sm:shrink min-w-[200px] sm:min-w-0',
               selectedAgent === agent.id
                 ? 'ring-2 shadow-md'
                 : 'hover:shadow-md opacity-70 hover:opacity-100'
@@ -162,7 +162,7 @@ export default function AIAssistant() {
                 )}
                 <div
                   className={clsx(
-                    'max-w-[75%] rounded-2xl px-4 py-3',
+                    'max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3',
                     message.role === 'user'
                       ? 'bg-blue-500 text-white'
                       : 'bg-slate-100 text-slate-800'

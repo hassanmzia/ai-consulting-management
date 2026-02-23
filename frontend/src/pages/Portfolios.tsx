@@ -101,18 +101,18 @@ export default function Portfolios() {
   if (preview) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-slate-900">Portfolio Preview</h2>
-          <button onClick={() => setPreview(null)} className="btn-secondary">Back to List</button>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Portfolio Preview</h2>
+          <button onClick={() => setPreview(null)} className="btn btn-secondary shrink-0">Back to List</button>
         </div>
         <div className="bg-white rounded-xl shadow-lg border overflow-hidden max-w-4xl mx-auto">
           {/* Header */}
-          <div className="p-8 text-white" style={{ background: preview.brand_color || '#1E3A8A' }}>
-            <h1 className="text-3xl font-bold">{preview.title}</h1>
+          <div className="p-5 sm:p-8 text-white" style={{ background: preview.brand_color || '#1E3A8A' }}>
+            <h1 className="text-xl sm:text-3xl font-bold">{preview.title}</h1>
             <p className="mt-2 opacity-90">Prepared for {preview.client_name || 'Client'}</p>
             {preview.brand_name && <p className="mt-1 text-sm opacity-75">By {preview.brand_name}</p>}
           </div>
-          <div className="p-8 space-y-8">
+          <div className="p-5 sm:p-8 space-y-6 sm:space-y-8">
             {preview.executive_summary && (
               <section>
                 <h2 className="text-xl font-bold text-slate-800 mb-3 pb-2 border-b-2" style={{ borderColor: preview.brand_color || '#1E3A8A' }}>Executive Summary</h2>
@@ -154,23 +154,23 @@ export default function Portfolios() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Consulting Portfolios</h2>
-          <p className="text-slate-500 mt-1">Build and manage client-ready consulting portfolios</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Consulting Portfolios</h2>
+          <p className="text-slate-500 text-sm mt-1">Build and manage client-ready consulting portfolios</p>
         </div>
-        <button onClick={() => { setShowForm(true); setEditing(null); }} className="btn-primary flex items-center gap-2">
+        <button onClick={() => { setShowForm(true); setEditing(null); }} className="btn btn-primary shrink-0">
           <Plus size={16} /> New Portfolio
         </button>
       </div>
 
       {/* Form modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 pt-10 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl p-6 m-4">
+        <div className="modal-overlay !items-start pt-4 sm:pt-10 overflow-y-auto">
+          <div className="modal-content w-full max-w-3xl p-4 sm:p-6 m-2 sm:m-4 !max-w-3xl !rounded-xl">
             <h3 className="text-lg font-bold mb-4">{editing ? 'Edit' : 'Create'} Portfolio</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Title *</label>
                   <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="input" />
@@ -200,7 +200,7 @@ export default function Portfolios() {
               {/* Branding */}
               <div className="border-t pt-4">
                 <h4 className="font-semibold text-slate-800 mb-3">Brand Identity</h4>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div><label className="block text-sm font-medium text-slate-700 mb-1">Brand Name</label>
                     <input value={form.brand_name} onChange={e => setForm({...form, brand_name: e.target.value})} className="input" /></div>
                   <div><label className="block text-sm font-medium text-slate-700 mb-1">Brand Color</label>
@@ -251,10 +251,10 @@ export default function Portfolios() {
             {p.project_name && <p className="text-sm text-slate-500 mb-1">Project: {p.project_name}</p>}
             {p.brand_name && <p className="text-sm text-slate-400">By {p.brand_name}</p>}
             <p className="text-xs text-slate-400 mt-2">Updated {new Date(p.updated_at).toLocaleDateString()}</p>
-            <div className="flex gap-2 mt-4 pt-3 border-t">
-              <button onClick={() => setPreview(p)} className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"><Eye size={14} /> Preview</button>
-              <button onClick={() => openEdit(p)} className="flex items-center gap-1 text-sm text-slate-600 hover:text-slate-800"><Edit3 size={14} /> Edit</button>
-              <button onClick={() => handleDelete(p.id)} className="flex items-center gap-1 text-sm text-red-500 hover:text-red-700"><Trash2 size={14} /> Delete</button>
+            <div className="flex gap-1 mt-4 pt-3 border-t">
+              <button onClick={() => setPreview(p)} className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 px-2 py-1.5 rounded-md hover:bg-blue-50"><Eye size={14} /> Preview</button>
+              <button onClick={() => openEdit(p)} className="flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-800 px-2 py-1.5 rounded-md hover:bg-slate-50"><Edit3 size={14} /> Edit</button>
+              <button onClick={() => handleDelete(p.id)} className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700 px-2 py-1.5 rounded-md hover:bg-red-50 ml-auto"><Trash2 size={14} /> Delete</button>
             </div>
           </div>
         ))}

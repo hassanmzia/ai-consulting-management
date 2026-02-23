@@ -104,7 +104,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         <StatsCard
           title="Total Revenue"
           value={formatCurrency(stats?.total_revenue ?? 0)}
@@ -166,9 +166,9 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Chart */}
-        <div className="card p-5 lg:col-span-2">
+        <div className="card p-5 lg:col-span-2 overflow-hidden">
           <h3 className="text-base font-semibold text-slate-900 mb-4">Monthly Revenue</h3>
-          <div className="h-72">
+          <div className="h-56 sm:h-72">
             {revenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={revenueData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -201,7 +201,7 @@ export default function Dashboard() {
         {/* Project Status Pie Chart */}
         <div className="card p-5">
           <h3 className="text-base font-semibold text-slate-900 mb-4">Project Status</h3>
-          <div className="h-72">
+          <div className="h-56 sm:h-72">
             {projectStatus.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -251,13 +251,13 @@ export default function Dashboard() {
         {/* Consultant Utilization */}
         <div className="card p-5">
           <h3 className="text-base font-semibold text-slate-900 mb-4">Consultant Utilization</h3>
-          <div className="h-72">
+          <div className="h-56 sm:h-72">
             {utilization.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={utilization}
                   layout="vertical"
-                  margin={{ top: 5, right: 20, left: 80, bottom: 5 }}
+                  margin={{ top: 5, right: 10, left: 60, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 12, fill: '#64748b' }} domain={[0, 100]} unit="%" />

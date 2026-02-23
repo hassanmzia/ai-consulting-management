@@ -174,10 +174,10 @@ export default function TimeTracking() {
               <tr>
                 <th>Date</th>
                 <th>Project</th>
-                <th>Consultant</th>
+                <th className="hide-mobile">Consultant</th>
                 <th>Hours</th>
                 <th>Description</th>
-                <th>Billable</th>
+                <th className="hide-mobile">Billable</th>
               </tr>
             </thead>
             <tbody>
@@ -185,10 +185,10 @@ export default function TimeTracking() {
                 <tr key={entry.id}>
                   <td className="text-slate-700">{entry.date}</td>
                   <td className="font-medium text-slate-900">{entry.project_name}</td>
-                  <td className="text-slate-600">{entry.consultant_name}</td>
+                  <td className="hide-mobile text-slate-600">{entry.consultant_name}</td>
                   <td className="font-semibold text-slate-900">{Number(entry.hours)}h</td>
                   <td className="text-slate-600 max-w-xs truncate">{entry.description}</td>
-                  <td>
+                  <td className="hide-mobile">
                     <span className={`badge ${entry.is_billable ? 'badge-active' : 'badge-draft'}`}>
                       {entry.is_billable ? 'Yes' : 'No'}
                     </span>

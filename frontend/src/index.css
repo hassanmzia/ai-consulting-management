@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* ============================================================
+   CSS Custom Properties
+   ============================================================ */
+
 :root {
   --color-primary: #3b82f6;
   --color-primary-dark: #2563eb;
@@ -19,6 +23,7 @@
   --color-text: #0f172a;
   --color-text-secondary: #64748b;
   --color-text-light: #94a3b8;
+  --focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.35);
 }
 
 @theme {
@@ -42,10 +47,20 @@
   --color-text-light: #94a3b8;
 }
 
+/* ============================================================
+   Global Reset & Base
+   ============================================================ */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html, body, #root {
@@ -59,9 +74,27 @@ body {
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+  overflow-wrap: break-word;
 }
 
-/* Scrollbar styling */
+/* Accessible focus-visible outlines for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ============================================================
+   Scrollbar Styling
+   ============================================================ */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -80,7 +113,10 @@ body {
   background: #94a3b8;
 }
 
-/* Card base styles */
+/* ============================================================
+   Card Styles
+   ============================================================ */
+
 .card {
   background: var(--color-card);
   border: 1px solid var(--color-border);
@@ -93,7 +129,22 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
-/* Badge styles */
+/* Reduce card padding on mobile */
+@media (max-width: 639px) {
+  .card {
+    border-radius: 8px;
+  }
+
+  .card > *:first-child {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* ============================================================
+   Badge Styles
+   ============================================================ */
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -104,6 +155,10 @@ body {
   line-height: 1.5;
   letter-spacing: 0.025em;
   text-transform: capitalize;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .badge-active, .badge-paid, .badge-completed {
@@ -146,7 +201,18 @@ body {
   color: #065f46;
 }
 
-/* Form styles */
+/* Ensure badges are readable on small screens */
+@media (max-width: 639px) {
+  .badge {
+    font-size: 0.6875rem;
+    padding: 2px 8px;
+  }
+}
+
+/* ============================================================
+   Form Styles
+   ============================================================ */
+
 input, select, textarea {
   font-family: inherit;
 }
@@ -169,9 +235,44 @@ input, select, textarea {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Increase input height on mobile for touch-friendly targets */
+@media (max-width: 639px) {
+  .input,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  input[type="date"],
+  input[type="datetime-local"],
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 1rem; /* prevents iOS zoom on focus */
+  }
+
+  /* Ensure select arrows are visible and tappable */
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+  }
+}
+
+/* ============================================================
+   Button Styles
+   ============================================================ */
+
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
@@ -181,6 +282,9 @@ input, select, textarea {
   transition: all 0.15s ease;
   border: 1px solid transparent;
   outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 .btn-primary {
@@ -190,6 +294,11 @@ input, select, textarea {
 
 .btn-primary:hover {
   background-color: var(--color-primary-dark);
+}
+
+.btn-primary:active {
+  background-color: #1d4ed8;
+  transform: scale(0.97);
 }
 
 .btn-secondary {
@@ -202,6 +311,11 @@ input, select, textarea {
   background-color: #f8fafc;
 }
 
+.btn-secondary:active {
+  background-color: #f1f5f9;
+  transform: scale(0.97);
+}
+
 .btn-danger {
   background-color: var(--color-danger);
   color: white;
@@ -211,9 +325,38 @@ input, select, textarea {
   background-color: #dc2626;
 }
 
-/* Table styles */
+.btn-danger:active {
+  background-color: #b91c1c;
+  transform: scale(0.97);
+}
+
+/* Disabled button state */
+.btn:disabled,
+.btn[disabled],
+.btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+}
+
+/* Increase button touch target on mobile */
+@media (max-width: 639px) {
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* ============================================================
+   Table Styles
+   ============================================================ */
+
 .table-container {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   background: white;
@@ -251,7 +394,47 @@ tr:hover td {
   background: #f8fafc;
 }
 
-/* Loading spinner */
+/* Sticky first column for wide tables */
+.table-sticky-col th:first-child,
+.table-sticky-col td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: white;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.table-sticky-col th:first-child {
+  background: #f8fafc;
+  z-index: 2;
+}
+
+/* Mobile table adjustments */
+@media (max-width: 639px) {
+  .table-container {
+    border-radius: 8px;
+  }
+
+  th {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.6875rem;
+  }
+
+  td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  /* Hide columns marked as mobile-hidden */
+  .hide-mobile {
+    display: none;
+  }
+}
+
+/* ============================================================
+   Loading Spinner
+   ============================================================ */
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -265,7 +448,10 @@ tr:hover td {
   animation: spin 0.6s linear infinite;
 }
 
-/* Modal overlay */
+/* ============================================================
+   Modal Styles
+   ============================================================ */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -285,4 +471,201 @@ tr:hover td {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Full-screen modal on mobile */
+@media (max-width: 639px) {
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+    border-radius: 16px 16px 0 0;
+    max-height: 95vh;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .modal-content > *:first-child {
+    padding-top: 1rem;
+  }
+
+  .modal-content > *:last-child {
+    padding-bottom: 1rem;
+  }
+}
+
+/* ============================================================
+   Utility: Page Header
+   flex-col on mobile, flex-row on desktop, with proper gap
+   ============================================================ */
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .page-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
+/* ============================================================
+   Utility: Mobile Card List
+   Converts a table-like layout into stacked cards on mobile
+   ============================================================ */
+
+.mobile-card-list {
+  display: contents;
+}
+
+@media (max-width: 639px) {
+  .mobile-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .mobile-card-list table,
+  .mobile-card-list thead {
+    display: none;
+  }
+
+  .mobile-card-list tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .mobile-card-list tr {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.75rem;
+  }
+
+  .mobile-card-list tr:hover td {
+    background: transparent;
+  }
+
+  .mobile-card-list td {
+    display: block;
+    padding: 0.25rem 0;
+    border-bottom: none;
+    font-size: 0.875rem;
+  }
+
+  .mobile-card-list td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.125rem;
+  }
+}
+
+/* ============================================================
+   Utility: Safe Bottom
+   Adds padding-bottom for mobile safe areas (notched phones)
+   ============================================================ */
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ============================================================
+   Utility: Touch Scroll
+   Horizontal scroll with momentum on touch devices
+   ============================================================ */
+
+.touch-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none; /* Firefox */
+}
+
+.touch-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================
+   Touch Device Overrides
+   Disable hover effects on pure touch devices
+   ============================================================ */
+
+@media (hover: none) {
+  .card:hover {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  tr:hover td {
+    background: transparent;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-primary);
+  }
+
+  .btn-secondary:hover {
+    background-color: white;
+  }
+
+  .btn-danger:hover {
+    background-color: var(--color-danger);
+  }
+
+  /* Active state provides touch feedback instead of hover */
+  .btn:active:not(:disabled) {
+    transform: scale(0.96);
+    opacity: 0.9;
+  }
+
+  .card:active {
+    opacity: 0.95;
+  }
+}
+
+/* ============================================================
+   Global Mobile Touch Target Enforcement
+   Ensure interactive elements meet 44px minimum on mobile
+   ============================================================ */
+
+@media (max-width: 639px) {
+  a,
+  button,
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Allow inline links to keep natural sizing but add tap padding */
+  p a,
+  span a,
+  li a {
+    min-height: auto;
+    min-width: auto;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
 }
