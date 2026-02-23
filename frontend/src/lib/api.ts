@@ -46,14 +46,14 @@ export async function fetchApi<T = unknown>(path: string, options: FetchOptions 
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
+    if (response.status === 401 && token) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
     const errorData = await response.json().catch(() => ({}));
     throw new ApiError(
-      errorData.detail || errorData.message || `Request failed with status ${response.status}`,
+      errorData.error || errorData.detail || errorData.message || `Request failed with status ${response.status}`,
       response.status
     );
   }
@@ -380,12 +380,12 @@ export interface KPI {
 }
 
 export interface LoginResponse {
-  access_token: string;
-  token_type: string;
+  token: string;
   user: {
     id: number;
     email: string;
-    name: string;
+    first_name: string;
+    last_name: string;
     role: string;
   };
 }

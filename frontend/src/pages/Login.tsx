@@ -20,8 +20,11 @@ export default function Login() {
 
     try {
       const response = await login(email, password);
-      localStorage.setItem('token', response.access_token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify({
+        ...response.user,
+        name: `${response.user.first_name} ${response.user.last_name}`,
+      }));
       navigate(from, { replace: true });
     } catch (err) {
       if (err instanceof Error) {
@@ -111,7 +114,7 @@ export default function Login() {
 
           <div className="mt-6 pt-6 border-t border-slate-200">
             <p className="text-xs text-slate-400 text-center">
-              Demo credentials: admin@consultpro.com / admin123
+              Demo credentials: admin@consulting.local / admin123
             </p>
           </div>
         </div>
