@@ -4,11 +4,8 @@ import { Plus, Search, FolderKanban, Calendar, DollarSign } from 'lucide-react';
 import { getProjects, getClients, createProject } from '@/lib/api';
 import type { Project, Client, CreateProjectData } from '@/lib/api';
 
-const STATUSES = ['planning', 'discovery', 'in_progress', 'on_hold', 'completed', 'cancelled'];
+const STATUSES = ['planning', 'in_progress', 'completed', 'on_hold', 'cancelled'];
 const PRIORITIES = ['low', 'medium', 'high', 'critical'];
-
-const statusLabel = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace('_', ' ');
-const priorityLabel = (p: string) => p.charAt(0).toUpperCase() + p.slice(1);
 
 export default function Projects() {
   const navigate = useNavigate();
@@ -17,47 +14,28 @@ export default function Projects() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const emptyForm: CreateProjectData = {
-    name: '',
-    client_id: 0,
-    status: 'planning',
-    priority: 'medium',
-    start_date: new Date().toISOString().split('T')[0],
-    end_date: '',
-    budget: 0,
-    description: '',
+    name: '', client_id: 0, description: '', status: 'planning',
+    priority: 'medium', start_date: new Date().toISOString().split('T')[0],
+    end_date: '', budget: 0,
   };
-
   const [form, setForm] = useState<CreateProjectData>(emptyForm);
 
-  const loadProjects = async () => {
+  const loadData = async () => {
     try {
       const params: Record<string, string> = {};
       if (statusFilter) params.status = statusFilter;
-      if (priorityFilter) params.priority = priorityFilter;
       if (search) params.search = search;
-      const data = await getProjects(params);
-      setProjects(data);
-    } catch {
-      // handle error
-    } finally {
-      setLoading(false);
-    }
+      const [p, c] = await Promise.all([getProjects(params), getClients()]);
+      setProjects(p); setClients(c);
+    } catch { /* */ } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    loadProjects();
-    getClients().then(setClients).catch(() => {});
-  }, [statusFilter, priorityFilter]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    loadProjects();
-  };
+  useEffect(() => { loadData(); }, []);
+  useEffect(() => { loadData(); }, [statusFilter, search]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,392 +44,148 @@ export default function Projects() {
       await createProject(form);
       setShowForm(false);
       setForm(emptyForm);
-      loadProjects();
-    } catch {
-      // handle error
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const getBudgetPercent = (project: Project) => {
-    if (!project.budget || project.budget === 0) return 0;
-    return Math.min((project.spent / project.budget) * 100, 100);
-  };
-
-  const getBudgetColor = (percent: number) => {
-    if (percent >= 90) return 'bg-red-500';
-    if (percent >= 70) return 'bg-amber-500';
-    return 'bg-emerald-500';
-  };
-
-  const getBudgetTextColor = (percent: number) => {
-    if (percent >= 90) return 'text-red-600';
-    if (percent >= 70) return 'text-amber-600';
-    return 'text-emerald-600';
+      loadData();
+    } catch { /* */ } finally { setSubmitting(false); }
   };
 
   return (
-    <div className="space-y-6">
-      {/* ── Page Header ── */}
+    <div className="space-y-6 animate-fade-in">
       <div className="page-header">
         <div>
-          <h1 className="page-title tracking-tight">Projects</h1>
-          <p className="page-subtitle">Track and manage all consulting engagements</p>
+          <h1 className="page-title">Projects</h1>
+          <p className="page-subtitle">Track and manage consulting engagements</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowForm(true)}>
-          <Plus size={18} />
-          New Project
-        </button>
+        <button className="btn btn-primary" onClick={() => setShowForm(true)}><Plus size={16} /> New Project</button>
       </div>
 
-      {/* ── Filter Bar ── */}
-      <div className="card p-4 animate-fade-in">
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-          <form onSubmit={handleSearch} className="flex-1 relative">
-            <Search
-              size={16}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-            />
-            <input
-              type="text"
-              className="input pl-10"
-              placeholder="Search projects by name or client..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </form>
-          <div className="flex gap-3">
-            <select
-              className="input w-auto min-w-[140px]"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">All Statuses</option>
-              {STATUSES.map((s) => (
-                <option key={s} value={s}>{statusLabel(s)}</option>
-              ))}
-            </select>
-            <select
-              className="input w-auto min-w-[140px]"
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-            >
-              <option value="">All Priorities</option>
-              {PRIORITIES.map((p) => (
-                <option key={p} value={p}>{priorityLabel(p)}</option>
-              ))}
-            </select>
+      {/* Filters */}
+      <div className="card p-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input className="input pl-9" placeholder="Search projects..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
+          <select className="input w-auto" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <option value="">All Statuses</option>
+            {STATUSES.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1).replace('_', ' ')}</option>)}
+          </select>
         </div>
       </div>
 
-      {/* ── Project Grid ── */}
+      {/* Project Table */}
       {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="spinner" />
-        </div>
+        <div className="flex items-center justify-center h-64"><div className="spinner" /></div>
       ) : projects.length === 0 ? (
-        /* ── Empty State ── */
-        <div className="card animate-fade-in">
-          <div className="empty-state py-16">
-            <div className="empty-state-icon" style={{ width: '5rem', height: '5rem' }}>
-              <FolderKanban size={32} className="text-slate-400" />
-            </div>
-            <p className="text-lg font-bold text-slate-700 tracking-tight">No projects found</p>
-            <p className="text-sm text-slate-400 mt-1 max-w-xs">
-              Create your first project to start tracking budgets, timelines, and deliverables.
-            </p>
-            <button
-              className="btn btn-primary mt-5"
-              onClick={() => setShowForm(true)}
-            >
-              <Plus size={16} />
-              Create Project
-            </button>
-          </div>
+        <div className="card empty-state">
+          <div className="empty-state-icon"><FolderKanban size={24} className="text-gray-400" /></div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-1">No projects found</h3>
+          <p className="text-sm text-gray-400 max-w-sm">{search || statusFilter ? 'Try adjusting your search or filters.' : 'Create your first project to get started.'}</p>
+          {!search && !statusFilter && (
+            <button className="btn btn-primary mt-4" onClick={() => setShowForm(true)}><Plus size={16} /> New Project</button>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {projects.map((project, idx) => {
-            const budgetPct = getBudgetPercent(project);
-            const budgetBarColor = getBudgetColor(budgetPct);
-            const budgetTxtColor = getBudgetTextColor(budgetPct);
-
-            return (
-              <div
-                key={project.id}
-                className="card card-interactive p-0 overflow-hidden animate-fade-in"
-                style={{ animationDelay: `${idx * 40}ms`, animationFillMode: 'backwards' }}
-                onClick={() => navigate(`/projects/${project.id}`)}
-              >
-                {/* Colored top strip based on priority */}
-                <div
-                  className="h-1"
-                  style={{
-                    background:
-                      project.priority === 'critical' || project.priority === 'high'
-                        ? 'linear-gradient(90deg, #ef4444, #f87171)'
-                        : project.priority === 'medium'
-                        ? 'linear-gradient(90deg, #f59e0b, #fbbf24)'
-                        : 'linear-gradient(90deg, #10b981, #34d399)',
-                  }}
-                />
-
-                <div className="p-5">
-                  {/* Top row: icon + name + priority badge */}
-                  <div className="flex items-start gap-3 mb-3">
-                    <div
-                      className="icon-box icon-box-md rounded-xl shrink-0"
-                      style={{
-                        background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
-                      }}
-                    >
-                      <FolderKanban size={18} className="text-indigo-500" />
+        <div className="table-container animate-fade-in">
+          <table>
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th className="hide-mobile">Client</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th className="hide-mobile">Budget</th>
+                <th className="hide-mobile">Dates</th>
+              </tr>
+            </thead>
+            <tbody>
+              {projects.map((project) => (
+                <tr key={project.id} className="cursor-pointer" onClick={() => navigate(`/projects/${project.id}`)}>
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                        <FolderKanban size={14} className="text-blue-600" />
+                      </div>
+                      <span className="font-medium text-gray-900">{project.name}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-slate-900 tracking-tight truncate leading-tight">
-                        {project.name}
-                      </h3>
-                      <p className="text-[13px] text-slate-500 mt-0.5 truncate">
-                        {project.client_name}
-                      </p>
-                    </div>
-                    <span className={`badge badge-${project.priority} shrink-0`}>
-                      {project.priority}
-                    </span>
-                  </div>
-
-                  {/* Status badge */}
-                  <div className="mb-3">
-                    <span className={`badge badge-${project.status}`}>
-                      {statusLabel(project.status)}
-                    </span>
-                  </div>
-
-                  {/* Dates */}
-                  <div className="flex items-center gap-1.5 text-[13px] text-slate-500 mb-4">
-                    <Calendar size={13} className="text-slate-400 shrink-0" />
-                    <span>{project.start_date}</span>
-                    {project.end_date && (
-                      <>
-                        <span className="text-slate-300 mx-0.5">&rarr;</span>
-                        <span>{project.end_date}</span>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="divider !my-0 mb-4" />
-
-                  {/* Budget section */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                        <DollarSign size={11} />
-                        Budget
-                      </span>
-                      <span className={`text-[11px] font-bold ${budgetTxtColor}`}>
-                        {budgetPct.toFixed(0)}% used
-                      </span>
-                    </div>
-                    <div className="progress-bar progress-bar-sm">
-                      <div
-                        className={`progress-bar-fill ${budgetBarColor}`}
-                        style={{
-                          width: `${budgetPct}%`,
-                          background: undefined,
-                        }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-[12px] text-slate-500">
-                        ${(project.spent ?? 0).toLocaleString()}
-                      </span>
-                      <span className="text-[12px] font-semibold text-slate-700">
-                        ${(project.budget ?? 0).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                  </td>
+                  <td className="hide-mobile"><span className="text-gray-600">{project.client_name}</span></td>
+                  <td><span className={`badge badge-${project.status}`}>{project.status.replace('_', ' ')}</span></td>
+                  <td><span className={`badge badge-${project.priority}`}>{project.priority}</span></td>
+                  <td className="hide-mobile">
+                    <span className="font-semibold text-gray-900">${(project.budget ?? 0).toLocaleString()}</span>
+                  </td>
+                  <td className="hide-mobile">
+                    <span className="text-xs text-gray-500">{project.start_date} - {project.end_date || 'Ongoing'}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* ── Create Project Modal ── */}
+      {/* Create Modal */}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
-          <div
-            className="modal-content p-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="px-6 pt-6 pb-4">
-              <div className="flex items-center gap-3 mb-1">
-                <div
-                  className="icon-box icon-box-md rounded-xl"
-                  style={{
-                    background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
-                  }}
-                >
-                  <FolderKanban size={18} className="text-indigo-500" />
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">New Project</h2>
+              <p className="text-sm text-gray-500 mb-6">Fill in the project details</p>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="label">Project Name *</label>
+                  <input className="input" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Project name" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Client *</label>
+                    <select className="input" required value={form.client_id} onChange={(e) => setForm({ ...form, client_id: Number(e.target.value) })}>
+                      <option value={0}>Select client</option>
+                      {clients.map((c) => <option key={c.id} value={c.id}>{c.company_name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label">Budget ($)</label>
+                    <input className="input" type="number" min="0" value={form.budget} onChange={(e) => setForm({ ...form, budget: Number(e.target.value) })} />
+                  </div>
                 </div>
                 <div>
-                  <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">
-                    New Project
-                  </h2>
-                  <p className="text-[13px] text-slate-500">
-                    Set up a new consulting engagement
-                  </p>
+                  <label className="label">Description</label>
+                  <textarea className="input" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Brief description..." />
                 </div>
-              </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Status</label>
+                    <select className="input" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                      {STATUSES.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1).replace('_', ' ')}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label">Priority</label>
+                    <select className="input" value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
+                      {PRIORITIES.map((p) => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Start Date *</label>
+                    <input className="input" type="date" required value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="label">End Date</label>
+                    <input className="input" type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} />
+                  </div>
+                </div>
+                <div className="divider" />
+                <div className="flex justify-end gap-3">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>
+                    {submitting ? <><div className="spinner spinner-sm" /> Creating...</> : <><Plus size={16} /> Create Project</>}
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <div className="divider !my-0" />
-
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-              {/* Project Name */}
-              <div>
-                <label className="label">
-                  Project Name <span className="text-red-400">*</span>
-                </label>
-                <input
-                  className="input"
-                  required
-                  placeholder="e.g. Digital Transformation Phase 2"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-              </div>
-
-              {/* Client */}
-              <div>
-                <label className="label">
-                  Client <span className="text-red-400">*</span>
-                </label>
-                <select
-                  className="input"
-                  required
-                  value={form.client_id}
-                  onChange={(e) => setForm({ ...form, client_id: Number(e.target.value) })}
-                >
-                  <option value={0}>Select a client</option>
-                  {clients.map((c) => (
-                    <option key={c.id} value={c.id}>{c.company_name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status + Priority */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Status</label>
-                  <select
-                    className="input"
-                    value={form.status}
-                    onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  >
-                    {STATUSES.map((s) => (
-                      <option key={s} value={s}>{statusLabel(s)}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="label">Priority</label>
-                  <select
-                    className="input"
-                    value={form.priority}
-                    onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                  >
-                    {PRIORITIES.map((p) => (
-                      <option key={p} value={p}>{priorityLabel(p)}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Dates */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">
-                    Start Date <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    className="input"
-                    type="date"
-                    required
-                    value={form.start_date}
-                    onChange={(e) => setForm({ ...form, start_date: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="label">End Date</label>
-                  <input
-                    className="input"
-                    type="date"
-                    value={form.end_date}
-                    onChange={(e) => setForm({ ...form, end_date: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              {/* Budget */}
-              <div>
-                <label className="label">Budget ($)</label>
-                <input
-                  className="input"
-                  type="number"
-                  min="0"
-                  step="100"
-                  placeholder="0"
-                  value={form.budget}
-                  onChange={(e) => setForm({ ...form, budget: Number(e.target.value) })}
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="label">Description</label>
-                <textarea
-                  className="input"
-                  rows={3}
-                  placeholder="Brief description of the project scope..."
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                />
-              </div>
-
-              {/* Actions */}
-              <div className="divider !mb-0" />
-              <div className="flex justify-end gap-3 pt-1">
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => setShowForm(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={submitting}
-                >
-                  {submitting ? (
-                    <>
-                      <div className="spinner-sm spinner" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Plus size={16} />
-                      Create Project
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
