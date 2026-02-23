@@ -13,7 +13,7 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 
 const navItems = [
@@ -47,6 +47,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const user = JSON.parse(localStorage.getItem('user') || '{"name":"Admin User","email":"admin@consultpro.com","role":"admin"}');
 
+  // Prevent body scrolling when mobile sidebar is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    return () => document.body.classList.remove('overflow-hidden');
+  }, [sidebarOpen]);
+
   const getPageTitle = () => {
     const path = location.pathname;
     if (pageTitles[path]) return pageTitles[path];
@@ -62,7 +72,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)', paddingLeft: 'env(safe-area-inset-left)', paddingRight: 'env(safe-area-inset-right)' }}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -87,10 +97,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <span className="text-white text-lg font-semibold tracking-tight">ConsultPro</span>
           <button
-            className="ml-auto lg:hidden text-white/60 hover:text-white"
+            className="ml-auto lg:hidden text-white/60 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
             onClick={() => setSidebarOpen(false)}
           >
-            <X size={20} />
+            <X size={20} className="transition-transform duration-200" />
           </button>
         </div>
 
@@ -125,7 +135,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* User section */}
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-white/10 sticky bottom-0 bg-inherit shrink-0">
           <div className="flex items-center gap-3 px-2">
             <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-semibold"
                  style={{ backgroundColor: '#3b82f6' }}>
@@ -149,14 +159,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-6 shrink-0">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-6 shrink-0 sticky top-0 z-30">
           <button
-            className="lg:hidden mr-4 text-slate-600 hover:text-slate-900"
+            className="lg:hidden mr-4 text-slate-600 hover:text-slate-900 min-w-[44px] min-h-[44px] flex items-center justify-center -ml-2"
             onClick={() => setSidebarOpen(true)}
           >
-            <Menu size={24} />
+            <Menu size={24} className="transition-transform duration-200" />
           </button>
-          <h1 className="text-xl font-semibold text-slate-900">{getPageTitle()}</h1>
+          <h1 className="text-xl font-semibold text-slate-900 truncate min-w-0">{getPageTitle()}</h1>
           <div className="ml-auto flex items-center gap-4">
             <span className="text-sm text-slate-500 hidden sm:block">{user.email || 'admin@consultpro.com'}</span>
           </div>

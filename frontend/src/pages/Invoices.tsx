@@ -145,13 +145,13 @@ export default function Invoices() {
               <tr>
                 <th>Invoice #</th>
                 <th>Client</th>
-                <th>Project</th>
+                <th className="hide-mobile">Project</th>
                 <th>Status</th>
                 <th>Amount</th>
-                <th>Tax</th>
+                <th className="hide-mobile">Tax</th>
                 <th>Total</th>
-                <th>Issue Date</th>
-                <th>Due Date</th>
+                <th className="hide-mobile">Issue Date</th>
+                <th className="hide-mobile">Due Date</th>
               </tr>
             </thead>
             <tbody>
@@ -159,15 +159,15 @@ export default function Invoices() {
                 <tr key={invoice.id}>
                   <td className="font-medium text-slate-900">{invoice.invoice_number}</td>
                   <td className="text-slate-600">{invoice.client_name}</td>
-                  <td className="text-slate-600">{invoice.project_name}</td>
+                  <td className="hide-mobile text-slate-600">{invoice.project_name}</td>
                   <td>
                     <span className={`badge badge-${invoice.status}`}>{invoice.status}</span>
                   </td>
                   <td className="text-slate-700">${(invoice.amount ?? 0).toLocaleString()}</td>
-                  <td className="text-slate-500">${(invoice.tax_amount ?? 0).toLocaleString()}</td>
+                  <td className="hide-mobile text-slate-500">${(invoice.tax_amount ?? 0).toLocaleString()}</td>
                   <td className="font-semibold text-slate-900">${(invoice.total_amount ?? 0).toLocaleString()}</td>
-                  <td className="text-slate-500">{invoice.issue_date}</td>
-                  <td className="text-slate-500">{invoice.due_date}</td>
+                  <td className="hide-mobile text-slate-500">{invoice.issue_date}</td>
+                  <td className="hide-mobile text-slate-500">{invoice.due_date}</td>
                 </tr>
               ))}
             </tbody>

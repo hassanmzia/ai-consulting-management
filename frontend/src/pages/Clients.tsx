@@ -142,11 +142,11 @@ export default function Clients() {
             <thead>
               <tr>
                 <th>Company</th>
-                <th>Industry</th>
+                <th className="hide-mobile">Industry</th>
                 <th>Status</th>
                 <th>Contact</th>
-                <th>Location</th>
-                <th>Revenue</th>
+                <th className="hide-mobile">Location</th>
+                <th className="hide-mobile">Revenue</th>
               </tr>
             </thead>
             <tbody>
@@ -166,7 +166,7 @@ export default function Clients() {
                       </div>
                     </div>
                   </td>
-                  <td>
+                  <td className="hide-mobile">
                     <span className="text-slate-600">{client.industry}</span>
                   </td>
                   <td>
@@ -182,13 +182,13 @@ export default function Clients() {
                       </span>
                     </div>
                   </td>
-                  <td>
+                  <td className="hide-mobile">
                     <span className="text-slate-600 flex items-center gap-1">
                       <MapPin size={14} className="text-slate-400" />
                       {client.city}{client.country ? `, ${client.country}` : ''}
                     </span>
                   </td>
-                  <td>
+                  <td className="hide-mobile">
                     <span className="font-semibold text-slate-900">
                       ${(client.total_revenue ?? 0).toLocaleString()}
                     </span>
