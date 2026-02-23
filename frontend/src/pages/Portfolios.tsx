@@ -54,7 +54,7 @@ export default function Portfolios() {
   async function loadData() {
     try {
       const [p, c, pr] = await Promise.all([
-        fetchApi('/api/portfolios'), fetchApi('/api/clients'), fetchApi('/api/projects')
+        fetchApi<Portfolio[]>('/api/portfolios'), fetchApi<Client[]>('/api/clients'), fetchApi<Project[]>('/api/projects')
       ]);
       setPortfolios(p); setClients(c); setProjects(pr);
     } catch { /* handled */ } finally { setLoading(false); }
