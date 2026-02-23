@@ -49,7 +49,7 @@ export default function ProjectDetail() {
 
   const budgetPct = project.budget > 0 ? Math.min((project.spent / project.budget) * 100, 100) : 0;
   const budgetColor = budgetPct >= 90 ? '#ef4444' : budgetPct >= 70 ? '#f59e0b' : '#10b981';
-  const totalHours = project.time_entries?.reduce((sum, t) => sum + t.hours, 0) ?? 0;
+  const totalHours = project.time_entries?.reduce((sum, t) => sum + Number(t.hours), 0) ?? 0;
 
   return (
     <div className="space-y-6">
@@ -167,22 +167,22 @@ export default function ProjectDetail() {
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th>Consultant</th>
+                  <th className="hide-mobile">Consultant</th>
                   <th>Hours</th>
                   <th>Description</th>
-                  <th>Billable</th>
+                  <th className="hide-mobile">Billable</th>
                 </tr>
               </thead>
               <tbody>
                 {project.time_entries.map((entry) => (
                   <tr key={entry.id}>
                     <td>{entry.date}</td>
-                    <td>{entry.consultant_name}</td>
-                    <td className="font-semibold">{entry.hours}h</td>
+                    <td className="hide-mobile">{entry.consultant_name}</td>
+                    <td className="font-semibold">{Number(entry.hours)}h</td>
                     <td className="text-slate-600 max-w-xs truncate">{entry.description}</td>
-                    <td>
-                      <span className={`badge ${entry.billable ? 'badge-active' : 'badge-draft'}`}>
-                        {entry.billable ? 'Yes' : 'No'}
+                    <td className="hide-mobile">
+                      <span className={`badge ${entry.is_billable ? 'badge-active' : 'badge-draft'}`}>
+                        {entry.is_billable ? 'Yes' : 'No'}
                       </span>
                     </td>
                   </tr>
