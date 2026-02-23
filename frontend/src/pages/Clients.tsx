@@ -75,11 +75,12 @@ export default function Clients() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500 mt-1">Manage your client relationships and track engagement</p>
+          <h1 className="page-title tracking-tight">Clients</h1>
+          <p className="page-subtitle">Manage your client relationships and track engagement</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowForm(true)}>
           <Plus size={18} />
@@ -88,20 +89,20 @@ export default function Clients() {
       </div>
 
       {/* Filters */}
-      <div className="card p-4">
+      <div className="card glass p-4 rounded-xl">
         <div className="flex flex-col sm:flex-row gap-3">
           <form onSubmit={handleSearch} className="flex-1 relative">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              className="input pl-10"
-              placeholder="Search clients..."
+              className="input pl-10 rounded-xl"
+              placeholder="Search clients by name, contact, or industry..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </form>
           <select
-            className="input w-auto"
+            className="input w-auto rounded-xl"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
@@ -113,7 +114,7 @@ export default function Clients() {
             ))}
           </select>
           <select
-            className="input w-auto"
+            className="input w-auto rounded-xl"
             value={industryFilter}
             onChange={(e) => setIndustryFilter(e.target.value)}
           >
@@ -131,13 +132,23 @@ export default function Clients() {
           <div className="spinner" />
         </div>
       ) : clients.length === 0 ? (
-        <div className="card p-12 text-center">
-          <Building2 size={48} className="mx-auto text-slate-300 mb-4" />
-          <p className="text-slate-500 text-lg font-medium">No clients found</p>
-          <p className="text-slate-400 text-sm mt-1">Add your first client to get started</p>
+        <div className="card animate-slide-up">
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <Building2 size={24} className="text-slate-400" />
+            </div>
+            <p className="text-slate-600 text-lg font-bold tracking-tight">No clients found</p>
+            <p className="text-slate-400 text-sm mt-1 max-w-xs">
+              Add your first client to start managing relationships and tracking engagement.
+            </p>
+            <button className="btn btn-primary mt-5" onClick={() => setShowForm(true)}>
+              <Plus size={16} />
+              Add Your First Client
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="table-container">
+        <div className="table-container animate-slide-up">
           <table>
             <thead>
               <tr>
@@ -153,21 +164,30 @@ export default function Clients() {
               {clients.map((client) => (
                 <tr
                   key={client.id}
-                  className="cursor-pointer"
+                  className="cursor-pointer group"
                   onClick={() => navigate(`/clients/${client.id}`)}
                 >
                   <td>
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
-                        <Building2 size={16} className="text-blue-500" />
+                      <div
+                        className="icon-box icon-box-sm rounded-xl"
+                        style={{
+                          background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)',
+                        }}
+                      >
+                        <Building2 size={16} className="text-indigo-500" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">{client.company_name}</p>
+                        <p className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                          {client.company_name}
+                        </p>
                       </div>
                     </div>
                   </td>
                   <td className="hide-mobile">
-                    <span className="text-slate-600">{client.industry}</span>
+                    <span className="text-xs font-medium text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg">
+                      {client.industry}
+                    </span>
                   </td>
                   <td>
                     <span className={`badge badge-${client.status}`}>
@@ -176,20 +196,24 @@ export default function Clients() {
                   </td>
                   <td>
                     <div className="flex flex-col">
-                      <span className="text-slate-700">{client.contact_name}</span>
-                      <span className="text-xs text-slate-400 flex items-center gap-1">
+                      <span className="text-sm font-medium text-slate-700">{client.contact_name}</span>
+                      <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
                         <Mail size={10} /> {client.contact_email}
                       </span>
                     </div>
                   </td>
                   <td className="hide-mobile">
-                    <span className="text-slate-600 flex items-center gap-1">
-                      <MapPin size={14} className="text-slate-400" />
-                      {client.city}{client.country ? `, ${client.country}` : ''}
-                    </span>
+                    {(client.city || client.country) ? (
+                      <span className="text-sm text-slate-500 flex items-center gap-1.5">
+                        <MapPin size={13} className="text-slate-300" />
+                        {client.city}{client.country ? `, ${client.country}` : ''}
+                      </span>
+                    ) : (
+                      <span className="text-slate-300 text-xs">--</span>
+                    )}
                   </td>
                   <td className="hide-mobile">
-                    <span className="font-semibold text-slate-900">
+                    <span className="text-sm font-bold text-slate-900 tracking-tight">
                       ${(client.total_revenue ?? 0).toLocaleString()}
                     </span>
                   </td>
@@ -203,23 +227,39 @@ export default function Clients() {
       {/* Add Client Modal */}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
-          <div className="modal-content p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Add New Client</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div
+              className="px-6 py-5 rounded-t-2xl"
+              style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5, #7c3aed)' }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                  <Building2 size={20} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-extrabold text-white tracking-tight">Add New Client</h2>
+                  <p className="text-indigo-200/70 text-xs mt-0.5">Fill in the details below to create a new client record</p>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Company Name *</label>
+                <label className="label">Company Name <span className="text-red-400">*</span></label>
                 <input
-                  className="input"
+                  className="input rounded-xl"
                   required
+                  placeholder="Enter company name"
                   value={form.company_name}
                   onChange={(e) => setForm({ ...form, company_name: e.target.value })}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Industry</label>
+                  <label className="label">Industry</label>
                   <select
-                    className="input"
+                    className="input rounded-xl"
                     value={form.industry}
                     onChange={(e) => setForm({ ...form, industry: e.target.value })}
                   >
@@ -229,9 +269,9 @@ export default function Clients() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                  <label className="label">Status</label>
                   <select
-                    className="input"
+                    className="input rounded-xl"
                     value={form.status}
                     onChange={(e) => setForm({ ...form, status: e.target.value })}
                   >
@@ -243,76 +283,111 @@ export default function Clients() {
                   </select>
                 </div>
               </div>
+
+              <div className="divider" />
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Contact Name *</label>
-                <input
-                  className="input"
-                  required
-                  value={form.contact_name}
-                  onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Email *</label>
-                  <input
-                    className="input"
-                    type="email"
-                    required
-                    value={form.contact_email}
-                    onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
-                  />
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Contact Information</p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="label">Contact Name <span className="text-red-400">*</span></label>
+                    <input
+                      className="input rounded-xl"
+                      required
+                      placeholder="Full name"
+                      value={form.contact_name}
+                      onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="label">Email <span className="text-red-400">*</span></label>
+                      <input
+                        className="input rounded-xl"
+                        type="email"
+                        required
+                        placeholder="email@company.com"
+                        value={form.contact_email}
+                        onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="label">Phone</label>
+                      <input
+                        className="input rounded-xl"
+                        placeholder="+1 (555) 000-0000"
+                        value={form.contact_phone}
+                        onChange={(e) => setForm({ ...form, contact_phone: e.target.value })}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                  <input
-                    className="input"
-                    value={form.contact_phone}
-                    onChange={(e) => setForm({ ...form, contact_phone: e.target.value })}
-                  />
-                </div>
               </div>
+
+              <div className="divider" />
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
-                <input
-                  className="input"
-                  value={form.address}
-                  onChange={(e) => setForm({ ...form, address: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">City</label>
-                  <input
-                    className="input"
-                    value={form.city}
-                    onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  />
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Location</p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="label">Address</label>
+                    <input
+                      className="input rounded-xl"
+                      placeholder="Street address"
+                      value={form.address}
+                      onChange={(e) => setForm({ ...form, address: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="label">City</label>
+                      <input
+                        className="input rounded-xl"
+                        placeholder="City"
+                        value={form.city}
+                        onChange={(e) => setForm({ ...form, city: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="label">Country</label>
+                      <input
+                        className="input rounded-xl"
+                        placeholder="Country"
+                        value={form.country}
+                        onChange={(e) => setForm({ ...form, country: e.target.value })}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
-                  <input
-                    className="input"
-                    value={form.country}
-                    onChange={(e) => setForm({ ...form, country: e.target.value })}
-                  />
-                </div>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+                <label className="label">Notes</label>
                 <textarea
-                  className="input"
+                  className="input rounded-xl"
                   rows={3}
+                  placeholder="Additional notes about this client..."
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                 />
               </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
+
+              <div className="flex justify-end gap-3 pt-3">
+                <button type="button" className="btn btn-ghost" onClick={() => setShowForm(false)}>
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Creating...' : 'Create Client'}
+                  {submitting ? (
+                    <>
+                      <div className="spinner-sm" style={{ borderTopColor: 'white', borderColor: 'rgba(255,255,255,0.3)' }} />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={16} />
+                      Create Client
+                    </>
+                  )}
                 </button>
               </div>
             </form>

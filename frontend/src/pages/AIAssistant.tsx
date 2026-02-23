@@ -17,13 +17,17 @@ const AGENT_TYPES = [
     label: 'Analytics Agent',
     description: 'Revenue, utilization, and performance metrics',
     icon: BarChart3,
-    color: '#3b82f6',
+    gradient: 'from-indigo-500 to-indigo-600',
+    lightBg: 'bg-indigo-50',
+    color: '#6366f1',
   },
   {
     id: 'planning',
     label: 'Planning Agent',
     description: 'Project planning and resource allocation',
     icon: Lightbulb,
+    gradient: 'from-amber-500 to-orange-500',
+    lightBg: 'bg-amber-50',
     color: '#f59e0b',
   },
   {
@@ -31,6 +35,8 @@ const AGENT_TYPES = [
     label: 'Client Insights Agent',
     description: 'Client analysis and recommendations',
     icon: Users,
+    gradient: 'from-emerald-500 to-teal-500',
+    lightBg: 'bg-emerald-50',
     color: '#10b981',
   },
 ];
@@ -107,74 +113,104 @@ export default function AIAssistant() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-10rem)] sm:h-[calc(100vh-8rem)]">
+    <div className="flex flex-col h-[calc(100vh-10rem)] sm:h-[calc(100vh-8rem)] animate-fade-in">
       {/* Agent Type Selector */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 shrink-0 touch-scroll sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0">
-        {AGENT_TYPES.map((agent) => (
-          <button
-            key={agent.id}
-            onClick={() => setSelectedAgent(agent.id)}
-            className={clsx(
-              'card p-4 text-left transition-all shrink-0 sm:shrink min-w-[200px] sm:min-w-0',
-              selectedAgent === agent.id
-                ? 'ring-2 shadow-md'
-                : 'hover:shadow-md opacity-70 hover:opacity-100'
-            )}
-            style={selectedAgent === agent.id ? { borderColor: agent.color, outlineColor: agent.color } : {}}
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: agent.color + '15', color: agent.color }}
-              >
-                <agent.icon size={20} />
+      <div className="flex gap-3 overflow-x-auto pb-3 mb-4 shrink-0 touch-scroll sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0">
+        {AGENT_TYPES.map((agent) => {
+          const isSelected = selectedAgent === agent.id;
+          return (
+            <button
+              key={agent.id}
+              onClick={() => setSelectedAgent(agent.id)}
+              className={clsx(
+                'card card-interactive p-4 text-left transition-all duration-200 shrink-0 sm:shrink min-w-[220px] sm:min-w-0',
+                isSelected
+                  ? 'ring-2 ring-indigo-500/30 shadow-lg border-indigo-200'
+                  : 'hover:shadow-md opacity-70 hover:opacity-100'
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={clsx(
+                    'icon-box icon-box-md rounded-xl text-white shadow-md transition-transform duration-200',
+                    `bg-gradient-to-br ${agent.gradient}`,
+                    isSelected && 'scale-110'
+                  )}
+                >
+                  <agent.icon size={20} />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-sm text-slate-900 tracking-tight">{agent.label}</p>
+                  <p className="text-[11px] text-slate-500 leading-snug">{agent.description}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-sm text-slate-900">{agent.label}</p>
-                <p className="text-xs text-slate-500">{agent.description}</p>
-              </div>
-            </div>
-          </button>
-        ))}
+              {isSelected && (
+                <div className={`h-0.5 bg-gradient-to-r ${agent.gradient} rounded-full mt-3 -mx-1`} />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 card flex flex-col overflow-hidden">
+      <div className="flex-1 card flex flex-col overflow-hidden rounded-xl border border-slate-200">
+        {/* Chat Header with Glass Effect */}
+        <div className="glass px-5 py-3 border-b border-slate-200/80 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className={`icon-box icon-box-sm rounded-lg text-white bg-gradient-to-br ${getAgentInfo(selectedAgent).gradient}`}>
+              <Bot size={14} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-900 tracking-tight">{getAgentInfo(selectedAgent).label}</p>
+              <p className="text-[11px] text-slate-400">
+                {isLoading ? 'Thinking...' : 'Ready to assist'}
+              </p>
+            </div>
+            <div className="ml-auto flex items-center gap-1.5">
+              <div className={clsx(
+                'w-2 h-2 rounded-full',
+                isLoading ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'
+              )} />
+              <span className="text-[11px] font-semibold text-slate-400">
+                {isLoading ? 'Processing' : 'Online'}
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5 bg-gradient-to-b from-slate-50/50 to-white">
           {messages.map((message) => {
             const agentInfo = getAgentInfo(message.agentType);
             return (
               <div
                 key={message.id}
                 className={clsx(
-                  'flex gap-3',
+                  'flex gap-3 animate-fade-in',
                   message.role === 'user' ? 'justify-end' : 'justify-start'
                 )}
               >
                 {message.role === 'assistant' && (
                   <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1"
-                    style={{ backgroundColor: agentInfo.color + '15' }}
+                    className={`icon-box icon-box-sm rounded-full text-white bg-gradient-to-br ${agentInfo.gradient} shadow-md shrink-0 mt-1`}
                   >
-                    <Bot size={16} style={{ color: agentInfo.color }} />
+                    <Bot size={14} />
                   </div>
                 )}
                 <div
                   className={clsx(
-                    'max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3',
+                    'max-w-[85%] sm:max-w-[75%] px-4 py-3 shadow-sm',
                     message.role === 'user'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-slate-100 text-slate-800'
+                      ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-2xl rounded-br-md'
+                      : 'bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-bl-md'
                   )}
                 >
                   {message.role === 'assistant' && message.agentType && (
-                    <div className="flex items-center gap-1.5 mb-1.5">
+                    <div className="flex items-center gap-1.5 mb-2">
                       <span
-                        className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                        className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full text-white"
                         style={{
-                          backgroundColor: agentInfo.color + '20',
-                          color: agentInfo.color,
+                          backgroundImage: `linear-gradient(135deg, ${agentInfo.color}, ${agentInfo.color}cc)`,
                         }}
                       >
                         {agentInfo.label}
@@ -184,8 +220,8 @@ export default function AIAssistant() {
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                   <p
                     className={clsx(
-                      'text-xs mt-1.5',
-                      message.role === 'user' ? 'text-blue-200' : 'text-slate-400'
+                      'text-[11px] mt-2 font-medium',
+                      message.role === 'user' ? 'text-indigo-200' : 'text-slate-400'
                     )}
                   >
                     {message.timestamp.toLocaleTimeString('en-US', {
@@ -195,8 +231,8 @@ export default function AIAssistant() {
                   </p>
                 </div>
                 {message.role === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center shrink-0 mt-1">
-                    <User size={16} className="text-white" />
+                  <div className="icon-box icon-box-sm rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-md shrink-0 mt-1">
+                    <User size={14} />
                   </div>
                 )}
               </div>
@@ -204,18 +240,17 @@ export default function AIAssistant() {
           })}
 
           {isLoading && (
-            <div className="flex gap-3">
+            <div className="flex gap-3 animate-fade-in">
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                style={{ backgroundColor: getAgentInfo(selectedAgent).color + '15' }}
+                className={`icon-box icon-box-sm rounded-full text-white bg-gradient-to-br ${getAgentInfo(selectedAgent).gradient} shadow-md shrink-0`}
               >
-                <Bot size={16} style={{ color: getAgentInfo(selectedAgent).color }} />
+                <Bot size={14} />
               </div>
-              <div className="bg-slate-100 rounded-2xl px-4 py-3">
+              <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-5 py-4 shadow-sm">
                 <div className="flex gap-1.5">
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             </div>
@@ -224,8 +259,8 @@ export default function AIAssistant() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="p-4 border-t border-slate-200 shrink-0">
+        {/* Input Area with Glass Effect */}
+        <div className="glass p-4 border-t border-slate-200/80 shrink-0">
           <div className="flex items-end gap-3">
             <div className="flex-1 relative">
               <textarea
@@ -234,7 +269,7 @@ export default function AIAssistant() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={`Ask the ${getAgentInfo(selectedAgent).label}...`}
-                className="input resize-none pr-4"
+                className="input resize-none pr-4 rounded-xl border-slate-200 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
                 rows={1}
                 style={{ minHeight: '2.5rem', maxHeight: '8rem' }}
               />
@@ -243,17 +278,17 @@ export default function AIAssistant() {
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
               className={clsx(
-                'btn rounded-xl px-4 py-2.5 transition-all',
+                'rounded-xl px-4 py-2.5 transition-all duration-200 flex items-center justify-center shadow-md',
                 input.trim() && !isLoading
-                  ? 'btn-primary'
-                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700 hover:shadow-lg active:scale-95'
+                  : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
               )}
             >
               <Send size={18} />
             </button>
           </div>
-          <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
-            <Sparkles size={12} />
+          <p className="text-[11px] text-slate-400 mt-2.5 flex items-center gap-1.5 font-medium">
+            <Sparkles size={12} className="text-indigo-400" />
             AI-powered insights based on your consulting data
           </p>
         </div>
