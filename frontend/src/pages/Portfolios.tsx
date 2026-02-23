@@ -40,9 +40,9 @@ export default function Portfolios() {
   async function loadData() {
     try {
       const [p, c, pr] = await Promise.all([
-        fetchApi<Portfolio[]>('/api/portfolios'),
-        fetchApi<Client[]>('/api/clients'),
-        fetchApi<Project[]>('/api/projects'),
+        fetchApi<Portfolio[]>('/portfolios'),
+        fetchApi<Client[]>('/clients'),
+        fetchApi<Project[]>('/projects'),
       ]);
       setPortfolios(p); setClients(c); setProjects(pr);
     } catch { /* */ } finally { setLoading(false); }
@@ -68,9 +68,9 @@ export default function Portfolios() {
     try {
       const body = { ...form, client_id: form.client_id || null, project_id: form.project_id || null };
       if (editing) {
-        await fetchApi(`/api/portfolios/${editing.id}`, { method: 'PUT', body: JSON.stringify(body) });
+        await fetchApi(`/portfolios/${editing.id}`, { method: 'PUT', body: JSON.stringify(body) });
       } else {
-        await fetchApi('/api/portfolios', { method: 'POST', body: JSON.stringify(body) });
+        await fetchApi('/portfolios', { method: 'POST', body: JSON.stringify(body) });
       }
       setShowForm(false); setEditing(null); setForm(defaultForm); loadData();
     } catch { /* */ }
@@ -78,7 +78,7 @@ export default function Portfolios() {
 
   async function handleDelete(id: number) {
     if (!confirm('Delete this portfolio?')) return;
-    await fetchApi(`/api/portfolios/${id}`, { method: 'DELETE' });
+    await fetchApi(`/portfolios/${id}`, { method: 'DELETE' });
     loadData();
   }
 
