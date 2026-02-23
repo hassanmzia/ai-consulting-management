@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Indicadores de Desempenho</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th class="text-center">Indicador</th>
+            <th class="text-center">Pontuação Inicial</th>
+            <th class="text-center">Pontuação Final</th>
+            <th class="text-center">Evolução (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for indicador in indicadores %}
+        <tr>
+            <td class="text-center">{{ indicador.nome }}</td>
+            <td class="text-center">{{ indicador.pontuacao_inicial }}</td>
+            <td class="text-center">{{ indicador.pontuacao_final }}</td>
+            <td class="text-center">{{ indicador.evolucao_percentual }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
