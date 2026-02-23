@@ -19,27 +19,26 @@ export default function StatsCard({
   icon: Icon,
   trend,
   trendValue,
-  iconColor = '#6366f1',
-  iconBg = '#eef2ff',
+  iconColor = '#2563eb',
+  iconBg = '#eff6ff',
 }: StatsCardProps) {
   const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
 
   return (
-    <div className="card p-5 relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: `linear-gradient(90deg, ${iconColor}, ${iconColor}80)` }} />
+    <div className="card p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">{title}</p>
-          <p className="text-2xl font-extrabold text-slate-900 tracking-tight leading-none">{value}</p>
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{value}</p>
           {(subtitle || trendValue) && (
-            <div className="flex items-center gap-2 mt-2.5">
+            <div className="flex items-center gap-2 mt-2">
               {trendValue && trend && (
                 <span
                   className={clsx(
-                    'inline-flex items-center gap-0.5 text-[11px] font-bold px-1.5 py-0.5 rounded-md',
-                    trend === 'up' && 'text-emerald-700 bg-emerald-50',
+                    'inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded',
+                    trend === 'up' && 'text-green-700 bg-green-50',
                     trend === 'down' && 'text-red-700 bg-red-50',
-                    trend === 'neutral' && 'text-slate-500 bg-slate-50'
+                    trend === 'neutral' && 'text-gray-500 bg-gray-50'
                   )}
                 >
                   <TrendIcon size={12} />
@@ -47,13 +46,13 @@ export default function StatsCard({
                 </span>
               )}
               {subtitle && (
-                <span className="text-[11px] text-slate-400 font-medium">{subtitle}</span>
+                <span className="text-xs text-gray-400">{subtitle}</span>
               )}
             </div>
           )}
         </div>
         <div
-          className="icon-box icon-box-md rounded-xl"
+          className="icon-box icon-box-md rounded-lg"
           style={{ backgroundColor: iconBg }}
         >
           <Icon size={20} style={{ color: iconColor }} />
