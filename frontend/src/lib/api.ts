@@ -318,7 +318,7 @@ export interface TimeEntry {
   date: string;
   hours: number;
   description: string;
-  billable: boolean;
+  is_billable: boolean;
   created_at: string;
 }
 
@@ -328,7 +328,7 @@ export interface CreateTimeEntryData {
   date: string;
   hours: number;
   description: string;
-  billable: boolean;
+  is_billable: boolean;
 }
 
 export interface Invoice {

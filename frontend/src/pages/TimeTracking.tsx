@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Clock, Plus, Search, Filter } from 'lucide-react';
+import { Clock, Plus, Filter } from 'lucide-react';
 import { getTimeEntries, getProjects, getConsultants, createTimeEntry } from '@/lib/api';
 import type { TimeEntry, Project, Consultant, CreateTimeEntryData } from '@/lib/api';
 
@@ -23,7 +23,7 @@ export default function TimeTracking() {
     date: new Date().toISOString().split('T')[0],
     hours: 1,
     description: '',
-    billable: true,
+    is_billable: true,
   };
 
   const [form, setForm] = useState<CreateTimeEntryData>(emptyForm);
@@ -33,8 +33,8 @@ export default function TimeTracking() {
       const params: Record<string, string> = {};
       if (projectFilter) params.project_id = projectFilter;
       if (consultantFilter) params.consultant_id = consultantFilter;
-      if (dateFrom) params.date_from = dateFrom;
-      if (dateTo) params.date_to = dateTo;
+      if (dateFrom) params.start_date = dateFrom;
+      if (dateTo) params.end_date = dateTo;
       const data = await getTimeEntries(params);
       setEntries(data);
     } catch {
@@ -69,8 +69,8 @@ export default function TimeTracking() {
     }
   };
 
-  const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
-  const billableHours = entries.filter((e) => e.billable).reduce((sum, e) => sum + e.hours, 0);
+  const totalHours = entries.reduce((sum, e) => sum + Number(e.hours), 0);
+  const billableHours = entries.filter((e) => e.is_billable).reduce((sum, e) => sum + Number(e.hours), 0);
 
   return (
     <div className="space-y-6">
@@ -186,11 +186,11 @@ export default function TimeTracking() {
                   <td className="text-slate-700">{entry.date}</td>
                   <td className="font-medium text-slate-900">{entry.project_name}</td>
                   <td className="text-slate-600">{entry.consultant_name}</td>
-                  <td className="font-semibold text-slate-900">{entry.hours}h</td>
+                  <td className="font-semibold text-slate-900">{Number(entry.hours)}h</td>
                   <td className="text-slate-600 max-w-xs truncate">{entry.description}</td>
                   <td>
-                    <span className={`badge ${entry.billable ? 'badge-active' : 'badge-draft'}`}>
-                      {entry.billable ? 'Yes' : 'No'}
+                    <span className={`badge ${entry.is_billable ? 'badge-active' : 'badge-draft'}`}>
+                      {entry.is_billable ? 'Yes' : 'No'}
                     </span>
                   </td>
                 </tr>
@@ -273,8 +273,8 @@ export default function TimeTracking() {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={form.billable}
-                    onChange={(e) => setForm({ ...form, billable: e.target.checked })}
+                    checked={form.is_billable}
+                    onChange={(e) => setForm({ ...form, is_billable: e.target.checked })}
                     className="w-4 h-4 rounded border-slate-300"
                   />
                   <span className="text-sm font-medium text-slate-700">Billable</span>
