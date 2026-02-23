@@ -6,10 +6,21 @@ import { authenticateToken, AuthRequest, JWT_SECRET } from '../middleware/auth.j
 
 const router = Router();
 
+// GET /api/auth/debug - check admin user status (remove in production)
+router.get('/debug', async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query('SELECT id, email, first_name, last_name, role, is_active, length(password_hash) as hash_len, substring(password_hash, 1, 7) as hash_prefix FROM users');
+    res.json({ users: result.rows, count: result.rows.length });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
 // POST /api/auth/login
 router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
+    console.log('[LOGIN] attempt:', email);
 
     if (!email || !password) {
       res.status(400).json({ error: 'Email and password are required' });
@@ -20,6 +31,7 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
       'SELECT id, email, password_hash, first_name, last_name, role, is_active FROM users WHERE email = $1',
       [email]
     );
+    console.log('[LOGIN] user found:', result.rows.length > 0, 'for email:', email);
 
     if (result.rows.length === 0) {
       res.status(401).json({ error: 'Invalid email or password' });
@@ -27,6 +39,7 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
     }
 
     const user = result.rows[0];
+    console.log('[LOGIN] user:', { id: user.id, active: user.is_active, hashLen: user.password_hash?.length, hashStart: user.password_hash?.substring(0, 7) });
 
     if (!user.is_active) {
       res.status(403).json({ error: 'Account is deactivated' });
@@ -34,6 +47,7 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
     }
 
     const validPassword = await bcrypt.compare(password, user.password_hash);
+    console.log('[LOGIN] bcrypt compare result:', validPassword);
     if (!validPassword) {
       res.status(401).json({ error: 'Invalid email or password' });
       return;

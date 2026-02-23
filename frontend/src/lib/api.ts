@@ -152,6 +152,12 @@ export const login = (email: string, password: string) =>
     body: JSON.stringify({ email, password }),
   });
 
+export const register = (data: { email: string; password: string; first_name: string; last_name: string }) =>
+  fetchApi<LoginResponse>('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
 // AI Agent
 export const getAgentResponse = (message: string, agentType?: string) => {
   const agentUrl = window.location.origin + '/agents/chat';
