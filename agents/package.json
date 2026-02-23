@@ -1,0 +1,29 @@
+{
+  "name": "consulting-agents",
+  "version": "1.0.0",
+  "description": "AI Agents service with MCP server and A2A protocol for consulting management",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.1",
+    "pg": "^8.13.1",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "@types/uuid": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}

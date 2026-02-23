@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+.env
+*.log
+.DS_Store
+*.pyc
+__pycache__/
+*.sqlite3
+staticfiles/
+media/
+.vscode/
+.idea/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+package-lock.json

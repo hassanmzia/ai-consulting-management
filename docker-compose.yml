@@ -1,0 +1,89 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_DB: consulting_db
+      POSTGRES_USER: consulting_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-consulting_secure_2024}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U consulting_user -d consulting_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - consulting-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=consulting_db
+      - DB_USER=consulting_user
+      - DB_PASSWORD=${DB_PASSWORD:-consulting_secure_2024}
+      - JWT_SECRET=${JWT_SECRET:-jwt-secret-change-in-prod-x7k2m9}
+      - AGENTS_URL=http://agents:5000
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - consulting-net
+
+  agents:
+    build:
+      context: ./agents
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=consulting_db
+      - DB_USER=consulting_user
+      - DB_PASSWORD=${DB_PASSWORD:-consulting_secure_2024}
+      - BACKEND_URL=http://backend:4000
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - consulting-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - consulting-net
+
+  nginx:
+    image: nginx:1.25-alpine
+    restart: always
+    ports:
+      - "172.168.1.95:3024:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
+      - agents
+    networks:
+      - consulting-net
+
+volumes:
+  postgres_data:
+
+networks:
+  consulting-net:
+    driver: bridge
