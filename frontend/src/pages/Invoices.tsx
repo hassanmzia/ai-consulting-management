@@ -5,6 +5,14 @@ import type { Invoice, Client, Project, CreateInvoiceData } from '@/lib/api';
 
 const STATUSES = ['draft', 'sent', 'paid', 'overdue', 'cancelled'];
 
+const STATUS_ICONS: Record<string, { color: string; bg: string }> = {
+  draft: { color: '#92400e', bg: 'from-amber-100 to-amber-50' },
+  sent: { color: '#1e40af', bg: 'from-blue-100 to-blue-50' },
+  paid: { color: '#065f46', bg: 'from-emerald-100 to-emerald-50' },
+  overdue: { color: '#991b1b', bg: 'from-red-100 to-red-50' },
+  cancelled: { color: '#64748b', bg: 'from-slate-100 to-slate-50' },
+};
+
 export default function Invoices() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -66,13 +74,15 @@ export default function Invoices() {
   const totalAmount = invoices.reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0);
   const paidAmount = invoices.filter((i) => i.status === 'paid').reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0);
   const overdueAmount = invoices.filter((i) => i.status === 'overdue').reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0);
+  const draftCount = invoices.filter((i) => i.status === 'draft').length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500 mt-1">Manage invoices and track payments</p>
+          <h1 className="page-title tracking-tight">Invoices</h1>
+          <p className="page-subtitle">Manage invoices, track payments, and monitor outstanding balances</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowForm(true)}>
           <Plus size={18} />
@@ -81,49 +91,82 @@ export default function Invoices() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="card p-5 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
-            <DollarSign size={20} className="text-blue-500" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Invoiced */}
+        <div className="card stat-card p-5 flex items-center gap-4" style={{ borderTop: '3px solid #6366f1' }}>
+          <div className="icon-box icon-box-md rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600">
+            <FileText size={20} className="text-white" />
           </div>
           <div>
-            <p className="text-sm text-slate-500">Total Invoiced</p>
-            <p className="text-xl font-bold text-slate-900">${totalAmount.toLocaleString()}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Invoiced</p>
+            <p className="text-2xl font-extrabold tracking-tight text-slate-900">
+              ${totalAmount.toLocaleString()}
+            </p>
           </div>
         </div>
-        <div className="card p-5 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center">
-            <CheckCircle size={20} className="text-emerald-500" />
+
+        {/* Paid */}
+        <div className="card stat-card p-5 flex items-center gap-4" style={{ borderTop: '3px solid #10b981' }}>
+          <div className="icon-box icon-box-md rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600">
+            <CheckCircle size={20} className="text-white" />
           </div>
           <div>
-            <p className="text-sm text-slate-500">Paid</p>
-            <p className="text-xl font-bold text-emerald-600">${paidAmount.toLocaleString()}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Paid</p>
+            <p className="text-2xl font-extrabold tracking-tight text-emerald-600">
+              ${paidAmount.toLocaleString()}
+            </p>
           </div>
         </div>
-        <div className="card p-5 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center">
-            <AlertCircle size={20} className="text-red-500" />
+
+        {/* Overdue */}
+        <div className="card stat-card p-5 flex items-center gap-4" style={{ borderTop: '3px solid #ef4444' }}>
+          <div className="icon-box icon-box-md rounded-xl bg-gradient-to-br from-red-500 to-red-600">
+            <AlertCircle size={20} className="text-white" />
           </div>
           <div>
-            <p className="text-sm text-slate-500">Overdue</p>
-            <p className="text-xl font-bold text-red-600">${overdueAmount.toLocaleString()}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Overdue</p>
+            <p className="text-2xl font-extrabold tracking-tight text-red-600">
+              ${overdueAmount.toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        {/* Drafts */}
+        <div className="card stat-card p-5 flex items-center gap-4" style={{ borderTop: '3px solid #f59e0b' }}>
+          <div className="icon-box icon-box-md rounded-xl bg-gradient-to-br from-amber-500 to-amber-600">
+            <DollarSign size={20} className="text-white" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Drafts</p>
+            <p className="text-2xl font-extrabold tracking-tight text-slate-900">{draftCount}</p>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filter Bar */}
       <div className="card p-4">
-        <div className="flex gap-3">
-          <select
-            className="input w-auto"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Statuses</option>
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-            ))}
-          </select>
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap">
+              Filter by
+            </span>
+            <select
+              className="input w-auto"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">All Statuses</option>
+              {STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1" />
+          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider hidden sm:inline-flex items-center whitespace-nowrap">
+            {invoices.length} invoice{invoices.length !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
 
@@ -133,13 +176,28 @@ export default function Invoices() {
           <div className="spinner" />
         </div>
       ) : invoices.length === 0 ? (
-        <div className="card p-12 text-center">
-          <FileText size={48} className="mx-auto text-slate-300 mb-4" />
-          <p className="text-slate-500 text-lg font-medium">No invoices found</p>
-          <p className="text-slate-400 text-sm mt-1">Create your first invoice to get started</p>
+        <div className="card empty-state animate-fade-in">
+          <div className="empty-state-icon">
+            <FileText size={28} className="text-slate-400" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-700 mb-1">No invoices found</h3>
+          <p className="text-sm text-slate-400 max-w-sm">
+            {statusFilter
+              ? 'No invoices match the selected status filter. Try a different filter.'
+              : 'Create your first invoice to start tracking payments.'}
+          </p>
+          {!statusFilter && (
+            <button
+              className="btn btn-primary mt-5"
+              onClick={() => setShowForm(true)}
+            >
+              <Plus size={18} />
+              Create Invoice
+            </button>
+          )}
         </div>
       ) : (
-        <div className="table-container">
+        <div className="table-container animate-fade-in">
           <table>
             <thead>
               <tr>
@@ -155,21 +213,56 @@ export default function Invoices() {
               </tr>
             </thead>
             <tbody>
-              {invoices.map((invoice) => (
-                <tr key={invoice.id}>
-                  <td className="font-medium text-slate-900">{invoice.invoice_number}</td>
-                  <td className="text-slate-600">{invoice.client_name}</td>
-                  <td className="hide-mobile text-slate-600">{invoice.project_name}</td>
-                  <td>
-                    <span className={`badge badge-${invoice.status}`}>{invoice.status}</span>
-                  </td>
-                  <td className="text-slate-700">${(invoice.amount ?? 0).toLocaleString()}</td>
-                  <td className="hide-mobile text-slate-500">${(invoice.tax_amount ?? 0).toLocaleString()}</td>
-                  <td className="font-semibold text-slate-900">${(invoice.total_amount ?? 0).toLocaleString()}</td>
-                  <td className="hide-mobile text-slate-500">{invoice.issue_date}</td>
-                  <td className="hide-mobile text-slate-500">{invoice.due_date}</td>
-                </tr>
-              ))}
+              {invoices.map((invoice) => {
+                const statusStyle = STATUS_ICONS[invoice.status] ?? STATUS_ICONS.draft;
+                return (
+                  <tr key={invoice.id}>
+                    <td>
+                      <span className="font-bold text-slate-900">{invoice.invoice_number}</span>
+                    </td>
+                    <td>
+                      <span className="font-semibold text-slate-700">{invoice.client_name}</span>
+                    </td>
+                    <td className="hide-mobile">
+                      <span className="text-slate-500">{invoice.project_name}</span>
+                    </td>
+                    <td>
+                      <span className={`badge badge-${invoice.status}`}>{invoice.status}</span>
+                    </td>
+                    <td>
+                      <span className="text-slate-700 font-semibold">
+                        ${(invoice.amount ?? 0).toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="hide-mobile">
+                      <span className="text-slate-400">
+                        ${(invoice.tax_amount ?? 0).toLocaleString()}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="font-extrabold text-slate-900">
+                        ${(invoice.total_amount ?? 0).toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="hide-mobile">
+                      <span className="text-slate-400 text-[13px]">{invoice.issue_date}</span>
+                    </td>
+                    <td className="hide-mobile">
+                      <span
+                        className="text-[13px] font-semibold"
+                        style={{
+                          color:
+                            invoice.status === 'overdue'
+                              ? '#ef4444'
+                              : '#94a3b8',
+                        }}
+                      >
+                        {invoice.due_date}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -178,111 +271,162 @@ export default function Invoices() {
       {/* Create Invoice Modal */}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
-          <div className="modal-content p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Create Invoice</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Client *</label>
-                <select
-                  className="input"
-                  required
-                  value={form.client_id}
-                  onChange={(e) => setForm({ ...form, client_id: Number(e.target.value) })}
-                >
-                  <option value={0}>Select a client</option>
-                  {clients.map((c) => (
-                    <option key={c.id} value={c.id}>{c.company_name}</option>
-                  ))}
-                </select>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            {/* Modal header with gradient strip */}
+            <div
+              className="h-1.5 w-full rounded-t-2xl"
+              style={{ background: 'linear-gradient(90deg, #6366f1, #818cf8, #a78bfa)' }}
+            />
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="icon-box icon-box-md rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600">
+                  <FileText size={20} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
+                    Create Invoice
+                  </h2>
+                  <p className="text-sm text-slate-400">Enter billing details below</p>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Project *</label>
-                <select
-                  className="input"
-                  required
-                  value={form.project_id}
-                  onChange={(e) => setForm({ ...form, project_id: Number(e.target.value) })}
-                >
-                  <option value={0}>Select a project</option>
-                  {projects
-                    .filter((p) => !form.client_id || p.client_id === form.client_id)
-                    .map((p) => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="label">Client *</label>
+                  <select
+                    className="input"
+                    required
+                    value={form.client_id}
+                    onChange={(e) => setForm({ ...form, client_id: Number(e.target.value) })}
+                  >
+                    <option value={0}>Select a client</option>
+                    {clients.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.company_name}
+                      </option>
                     ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+                  </select>
+                </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Amount ($) *</label>
-                  <input
+                  <label className="label">Project *</label>
+                  <select
                     className="input"
-                    type="number"
-                    min="0"
-                    step="0.01"
                     required
-                    value={form.amount}
-                    onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })}
-                  />
+                    value={form.project_id}
+                    onChange={(e) => setForm({ ...form, project_id: Number(e.target.value) })}
+                  >
+                    <option value={0}>Select a project</option>
+                    {projects
+                      .filter((p) => !form.client_id || p.client_id === form.client_id)
+                      .map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                  </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Tax ($)</label>
-                  <input
-                    className="input"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.tax_amount}
-                    onChange={(e) => setForm({ ...form, tax_amount: Number(e.target.value) })}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Amount ($) *</label>
+                    <input
+                      className="input"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      required
+                      value={form.amount}
+                      onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })}
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Tax ($)</label>
+                    <input
+                      className="input"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.tax_amount}
+                      onChange={(e) =>
+                        setForm({ ...form, tax_amount: Number(e.target.value) })
+                      }
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Issue Date *</label>
-                  <input
-                    className="input"
-                    type="date"
-                    required
-                    value={form.issue_date}
-                    onChange={(e) => setForm({ ...form, issue_date: e.target.value })}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Issue Date *</label>
+                    <input
+                      className="input"
+                      type="date"
+                      required
+                      value={form.issue_date}
+                      onChange={(e) => setForm({ ...form, issue_date: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Due Date *</label>
+                    <input
+                      className="input"
+                      type="date"
+                      required
+                      value={form.due_date}
+                      onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Due Date *</label>
-                  <input
-                    className="input"
-                    type="date"
-                    required
-                    value={form.due_date}
-                    onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-                  />
+
+                {/* Totals breakdown */}
+                <div className="rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">
+                    Invoice Summary
+                  </p>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Subtotal</span>
+                    <span className="font-semibold text-slate-700">
+                      ${form.amount.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm mt-1.5">
+                    <span className="text-slate-500">Tax</span>
+                    <span className="font-semibold text-slate-700">
+                      ${form.tax_amount.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="divider" style={{ margin: '0.625rem 0' }} />
+                  <div className="flex justify-between">
+                    <span className="font-bold text-slate-900">Total</span>
+                    <span className="text-lg font-extrabold tracking-tight text-indigo-600">
+                      ${(form.amount + form.tax_amount).toLocaleString()}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="p-3 bg-slate-50 rounded-lg">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Subtotal</span>
-                  <span className="text-slate-700">${form.amount.toLocaleString()}</span>
+
+                <div className="divider" />
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() => setShowForm(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>
+                    {submitting ? (
+                      <>
+                        <div className="spinner-sm spinner" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={16} />
+                        Create Invoice
+                      </>
+                    )}
+                  </button>
                 </div>
-                <div className="flex justify-between text-sm mt-1">
-                  <span className="text-slate-500">Tax</span>
-                  <span className="text-slate-700">${form.tax_amount.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-sm mt-2 pt-2 border-t border-slate-200">
-                  <span className="font-medium text-slate-900">Total</span>
-                  <span className="font-bold text-slate-900">
-                    ${(form.amount + form.tax_amount).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Creating...' : 'Create Invoice'}
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}
